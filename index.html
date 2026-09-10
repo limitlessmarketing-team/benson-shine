@@ -131,7 +131,18 @@ header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.92);backdro
 .work{background:#fff}
 .ba{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:stretch}
 .ba figure{border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);position:relative;background:#eef2f6}
-.ba .big img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.ba .big{aspect-ratio:896/1228;max-height:640px;width:100%}
+.cmp{position:absolute;inset:0;user-select:none;-webkit-user-select:none;touch-action:none;cursor:ew-resize;overflow:hidden}
+.cmp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.cmp .after{clip-path:inset(0 0 0 var(--pos,50%))}
+.cmp .line{position:absolute;top:0;bottom:0;left:var(--pos,50%);width:3px;background:#fff;transform:translateX(-50%);box-shadow:0 0 0 1px rgba(0,17,43,.25);pointer-events:none}
+.cmp .knob{position:absolute;top:50%;left:var(--pos,50%);width:46px;height:46px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);display:grid;place-items:center;box-shadow:0 6px 18px rgba(0,17,43,.35);color:var(--navy);pointer-events:none}
+.cmp .knob svg{width:22px;height:22px}
+.cmp .tag{position:absolute;top:14px;padding:6px 12px;border-radius:999px;font-family:var(--hf);font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(0,17,43,.7);backdrop-filter:blur(4px);pointer-events:none}
+.cmp .tag.b{left:14px}.cmp .tag.a{right:14px;background:var(--blue)}
+.cmp .hint{position:absolute;left:0;right:0;bottom:14px;text-align:center;font-family:var(--hf);font-weight:600;font-size:.85rem;color:#fff;text-shadow:0 1px 6px rgba(0,17,43,.7);pointer-events:none;transition:opacity .3s}
+.cmp.moved .hint{opacity:0}
+.cmp input{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;cursor:ew-resize}
 .ba .side{display:grid;grid-template-rows:1fr 1fr;gap:22px;min-height:0}
 .ba .side figure{min-height:0}
 .ba .side img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -386,7 +397,17 @@ footer a:hover{color:#fff}
       <p class="lead">Real results from real jobs around Northern Utah, no stock photos. Hard water film, sprinkler spots and a season of dust, gone.</p>
     </div>
     <div class="ba">
-      <figure class="big reveal"><img src="img/before-after.jpg" alt="Before and after of a hazy backyard window turned crystal clear" loading="lazy"></figure>
+      <figure class="big reveal">
+        <div class="cmp" id="cmp" style="--pos:50%">
+          <img src="img/before.jpg" alt="Hazy backyard window before cleaning" loading="lazy">
+          <img class="after" src="img/after.jpg" alt="The same window crystal clear after cleaning" loading="lazy">
+          <div class="line"></div>
+          <div class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg></div>
+          <span class="tag b">Before</span><span class="tag a">After</span>
+          <div class="hint">Drag to see the difference</div>
+          <input type="range" min="0" max="100" value="50" aria-label="Compare before and after">
+        </div>
+      </figure>
       <div class="side">
         <figure class="reveal"><img src="img/detail.jpg" alt="Clean window with blinds behind it after a wash" loading="lazy"><figcaption>Detail work: frames and edges, not just the middle</figcaption></figure>
         <figure class="reveal"><img src="img/storefront.jpg" alt="Storefront windows cleaned for a local barbershop" loading="lazy"><figcaption>Storefront glass, sills inside and out</figcaption></figure>
@@ -563,6 +584,15 @@ function toggleMenu(){var m=document.getElementById('mobile'),b=document.querySe
 // reveal on scroll
 var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
 document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+// before/after slider
+(function(){var c=document.getElementById('cmp');if(!c)return;var r=c.querySelector('input');
+function set(v){v=Math.max(0,Math.min(100,v));c.style.setProperty('--pos',v+'%');r.value=v;c.classList.add('moved');}
+r.addEventListener('input',function(){set(+r.value)});
+function fromX(x){var b=c.getBoundingClientRect();set((x-b.left)/b.width*100)}
+var down=false;c.addEventListener('pointerdown',function(e){down=true;c.setPointerCapture(e.pointerId);fromX(e.clientX)});
+c.addEventListener('pointermove',function(e){if(down)fromX(e.clientX)});
+c.addEventListener('pointerup',function(){down=false});c.addEventListener('pointercancel',function(){down=false});
+})();
 // quote form (demo: no backend wired yet — shows confirmation)
 document.getElementById('qform').addEventListener('submit',function(ev){
   ev.preventDefault();
